@@ -4,6 +4,7 @@
 
 ## Membres du projet
 - **LESBARRERES Emma LESE02560400**  
+- **DE JERPHANION Tanguy DEJT06040600**
 
 ---
 
