@@ -16,4 +16,8 @@
 ### Packages utilisés
 - **XR Interaction Toolkit**
 
+### Modalités de déplacements 
+- **Continuous Turn**
+- **Continuous Move**
+
 ---
