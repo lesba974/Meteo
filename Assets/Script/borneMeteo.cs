@@ -9,6 +9,7 @@ public class BorneMeteo : MonoBehaviour
 
     public void BoutonPresse()
     {
+        Debug.Log("Bouton pressé");
         StartCoroutine(AppelAPI());
     }
 
