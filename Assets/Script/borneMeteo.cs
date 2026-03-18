@@ -10,6 +10,7 @@ public class BorneMeteo : MonoBehaviour
     public ParticleSystem rain;
     public ParticleSystem snow;
     public AudioSource rainAudio;
+    public AudioSource button;
 
     public void BoutonPresse()
     {
@@ -19,6 +20,7 @@ public class BorneMeteo : MonoBehaviour
 
     IEnumerator AppelAPI()
     {
+        button.Play();
         string url = "https://api.open-meteo.com/v1/forecast?latitude=48.42&longitude=-71.06&current_weather=true";
 
         UnityWebRequest request = UnityWebRequest.Get(url);
