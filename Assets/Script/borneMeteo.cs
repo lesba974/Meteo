@@ -9,6 +9,7 @@ public class BorneMeteo : MonoBehaviour
     public TextMeshProUGUI texte;
     public ParticleSystem rain;
     public ParticleSystem snow;
+    public AudioSource rainAudio;
 
     public void BoutonPresse()
     {
@@ -89,13 +90,33 @@ public class BorneMeteo : MonoBehaviour
         if (rain != null) rain.Stop();
         if (snow != null) snow.Stop();
 
-        if (code >= 51 && code <= 67) rain.Play();
+        if (code >= 51 && code <= 67)
+        {
+            rain.Play();
+            rainAudio.Play();
+        }
 
-        if (code >= 71 && code <= 77) snow.Play();
+        else if (code >= 71 && code <= 77)
+        {
+            snow.Play();
+            rainAudio.Stop();
+        }
 
-        if (code >= 80 && code <= 82) rain.Play();//"Averses";
+        else if (code >= 80 && code <= 82)
+        {
+            rain.Play();//"Averses";
+            rainAudio.Play();
+        }
 
-        if (code >= 95) rain.Play(); //"Orage";
+        else if (code >= 95)
+        {
+            rain.Play(); //"Orage";
+            rainAudio.Play();
+        }
+        else
+        {
+            rainAudio.Stop();
+        }
     }
 }
 
