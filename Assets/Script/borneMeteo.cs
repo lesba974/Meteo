@@ -5,7 +5,10 @@ using System.Collections;
 
 public class BorneMeteo : MonoBehaviour
 {
+    public Light sceneLight;
     public TextMeshProUGUI texte;
+    public ParticleSystem rain;
+    public ParticleSystem snow;
 
     public void BoutonPresse()
     {
@@ -28,6 +31,9 @@ public class BorneMeteo : MonoBehaviour
             float temp = data.current_weather.temperature;
             float wind = data.current_weather.windspeed;
             int code = data.current_weather.weathercode;
+
+            UpdateLight(code);
+            UpdateParticle(code);
 
             string meteo = GetWeatherName(code);
 
@@ -63,6 +69,34 @@ public class BorneMeteo : MonoBehaviour
         return "Inconnu";
     }
 
+    void UpdateLight(int code)
+    {
+        if (sceneLight == null) return;
+
+        if (code == 0) sceneLight.intensity = 1.5f;
+
+        if (code <= 3) sceneLight.intensity = 1.0f;
+
+        if (code <= 60) sceneLight.intensity = 0.6f;
+
+        if (code <= 80) sceneLight.intensity = 0.4f;
+
+        else sceneLight.intensity = 0.2f;
+    }
+
+    void UpdateParticle(int code)
+    {
+        if (rain != null) rain.Stop();
+        if (snow != null) snow.Stop();
+
+        if (code >= 51 && code <= 67) rain.Play();
+
+        if (code >= 71 && code <= 77) snow.Play();
+
+        if (code >= 80 && code <= 82) rain.Play();//"Averses";
+
+        if (code >= 95) rain.Play(); //"Orage";
+    }
 }
 
 [System.Serializable]
