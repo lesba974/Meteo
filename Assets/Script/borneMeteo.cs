@@ -8,6 +8,7 @@ using System.Globalization;
 public class BorneMeteo : MonoBehaviour
 {
     public Light sceneLight;
+    public Light lightningLight;
     public TextMeshProUGUI txtVille;
     public TextMeshProUGUI txtDate;
     public TextMeshProUGUI txtTemp;
@@ -15,6 +16,7 @@ public class BorneMeteo : MonoBehaviour
     public TextMeshProUGUI txtVent;
     public ParticleSystem rain;
     public ParticleSystem snow;
+    public ParticleSystem clouds;
     public AudioSource rainAudio;
     public AudioSource thunderAudio;
     public AudioSource button;
@@ -23,6 +25,17 @@ public class BorneMeteo : MonoBehaviour
     float latitude = 48.42f;
     float longitude = -71.06f;
     string nomVille = "Chicoutimi (Canada)";
+
+    bool eclairActif = false; 
+
+    void Start()
+    {
+        if (clouds != null) clouds.Stop();
+        if (rain != null) rain.Stop();
+        if (snow != null) snow.Stop();
+        if (lightningLight != null) lightningLight.enabled = false;
+        RenderSettings.fog = false;
+    }
 
     public void AujourdHui()
     {
@@ -73,6 +86,30 @@ public class BorneMeteo : MonoBehaviour
         StartCoroutine(AppelAPI());
     }
 
+    IEnumerator Eclair()
+    {
+        eclairActif = true;
+        while (eclairActif)
+        {
+            yield return new WaitForSeconds(UnityEngine.Random.Range(3f, 8f));
+            int flashs = UnityEngine.Random.Range(2, 4);
+            for (int i = 0; i < flashs; i++)
+            {
+                if (lightningLight != null) lightningLight.enabled = true;
+                yield return new WaitForSeconds(0.3f);
+                if (lightningLight != null) lightningLight.enabled = false;
+                yield return new WaitForSeconds(0.25f);
+            }
+        }
+    }
+
+    void ArreterEclair()
+    {
+        eclairActif = false;
+        if (lightningLight != null) lightningLight.enabled = false;
+        StopCoroutine("Eclair");
+    }
+
     public IEnumerator AppelAPI()
     {
         button.Play();
@@ -103,6 +140,7 @@ public class BorneMeteo : MonoBehaviour
 
             UpdateLight(code);
             UpdateParticle(code);
+            UpdateFog(code);
 
             string meteo = GetWeatherName(code);
 
@@ -139,27 +177,50 @@ public class BorneMeteo : MonoBehaviour
     void UpdateLight(int code)
     {
         if (sceneLight == null) return;
-        if (code == 0) sceneLight.intensity = 1.5f;
-        else if (code >= 1 && code <= 3) sceneLight.intensity = 1.0f;
-        else if (code >= 45 && code <= 48) sceneLight.intensity = 0.3f;
-        else if (code >= 51 && code <= 67) sceneLight.intensity = 0.6f;
-        else if (code >= 71 && code <= 77) sceneLight.intensity = 0.4f;
-        else if (code >= 80 && code <= 82) sceneLight.intensity = 0.4f;
-        else if (code >= 85 && code <= 86) sceneLight.intensity = 0.4f;
-        else if (code >= 95) sceneLight.intensity = 0.2f;
+        if (code == 0) { sceneLight.intensity = 1.5f; sceneLight.color = new Color(1f, 0.95f, 0.8f); }
+        else if (code >= 1 && code <= 3) { sceneLight.intensity = 1.0f; sceneLight.color = new Color(0.7f, 0.75f, 0.85f); }
+        else if (code >= 45 && code <= 48) { sceneLight.intensity = 0.5f; sceneLight.color = new Color(0.6f, 0.65f, 0.7f); }
+        else if (code >= 51 && code <= 67) { sceneLight.intensity = 0.6f; sceneLight.color = new Color(0.6f, 0.65f, 0.75f); }
+        else if (code >= 71 && code <= 77) { sceneLight.intensity = 0.6f; sceneLight.color = new Color(0.8f, 0.88f, 1f); }
+        else if (code >= 80 && code <= 82) { sceneLight.intensity = 0.4f; sceneLight.color = new Color(0.5f, 0.55f, 0.65f); }
+        else if (code >= 85 && code <= 86) { sceneLight.intensity = 0.4f; sceneLight.color = new Color(0.7f, 0.78f, 0.9f); }
+        else if (code >= 95) { sceneLight.intensity = 0.2f; sceneLight.color = new Color(0.4f, 0.4f, 0.5f); }
     }
 
     void UpdateParticle(int code)
     {
         if (rain != null) rain.Stop();
         if (snow != null) snow.Stop();
+        if (clouds != null) clouds.Stop();
+        ArreterEclair(); 
 
-        if (code >= 51 && code <= 67) { rain.Play(); rainAudio.Play(); thunderAudio.Stop(); }
+        if (code >= 1 && code <= 3) { clouds.Play(); }
+        else if (code >= 51 && code <= 67) { rain.Play(); rainAudio.Play(); thunderAudio.Stop(); }
         else if (code >= 71 && code <= 77) { snow.Play(); rainAudio.Stop(); thunderAudio.Stop(); }
         else if (code >= 80 && code <= 82) { rain.Play(); rainAudio.Play(); thunderAudio.Stop(); }
         else if (code >= 85 && code <= 86) { snow.Play(); rainAudio.Stop(); thunderAudio.Stop(); }
-        else if (code >= 95) { rain.Play(); rainAudio.Stop(); thunderAudio.Play(); }
+        else if (code >= 95)
+        {
+            rain.Play();
+            rainAudio.Stop();
+            thunderAudio.Play();
+            StartCoroutine("Eclair"); 
+        }
         else { rainAudio.Stop(); thunderAudio.Stop(); }
+    }
+
+    void UpdateFog(int code)
+    {
+        if (code >= 45 && code <= 48)
+        {
+            RenderSettings.fog = true;
+            RenderSettings.fogDensity = 0.15f;
+        }
+        else
+        {
+            RenderSettings.fog = false;
+            RenderSettings.fogDensity = 0f;
+        }
     }
 }
 
