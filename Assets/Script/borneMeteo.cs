@@ -3,6 +3,7 @@ using UnityEngine.Networking;
 using TMPro;
 using System.Collections;
 using System;
+using System.Globalization;
 
 public class BorneMeteo : MonoBehaviour
 {
@@ -15,6 +16,7 @@ public class BorneMeteo : MonoBehaviour
     public ParticleSystem rain;
     public ParticleSystem snow;
     public AudioSource rainAudio;
+    public AudioSource thunderAudio;
     public AudioSource button;
 
     [HideInInspector] public int jourSelectionne = 0;
@@ -76,8 +78,8 @@ public class BorneMeteo : MonoBehaviour
         button.Play();
 
         string url = "https://api.open-meteo.com/v1/forecast?latitude="
-                        + latitude +
-                        "&longitude=" + longitude +
+                        + latitude.ToString(CultureInfo.InvariantCulture) +
+                        "&longitude=" + longitude.ToString(CultureInfo.InvariantCulture) +
                         "&hourly=temperature_2m,weathercode,windspeed_10m&timezone=auto";
 
         UnityWebRequest request = UnityWebRequest.Get(url);
@@ -93,6 +95,7 @@ public class BorneMeteo : MonoBehaviour
             float temp = data.hourly.temperature_2m[index];
             float wind = data.hourly.windspeed_10m[index];
             int code = data.hourly.weathercode[index];
+
             DateTime dateHeure = DateTime.Parse(data.hourly.time[index]);
             string[] jours = { "Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi" };
             string[] mois = { "janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre" };
@@ -137,10 +140,13 @@ public class BorneMeteo : MonoBehaviour
     {
         if (sceneLight == null) return;
         if (code == 0) sceneLight.intensity = 1.5f;
-        else if (code <= 3) sceneLight.intensity = 1.0f;
-        else if (code <= 60) sceneLight.intensity = 0.6f;
-        else if (code <= 80) sceneLight.intensity = 0.4f;
-        else sceneLight.intensity = 0.2f;
+        else if (code >= 1 && code <= 3) sceneLight.intensity = 1.0f;
+        else if (code >= 45 && code <= 48) sceneLight.intensity = 0.3f;
+        else if (code >= 51 && code <= 67) sceneLight.intensity = 0.6f;
+        else if (code >= 71 && code <= 77) sceneLight.intensity = 0.4f;
+        else if (code >= 80 && code <= 82) sceneLight.intensity = 0.4f;
+        else if (code >= 85 && code <= 86) sceneLight.intensity = 0.4f;
+        else if (code >= 95) sceneLight.intensity = 0.2f;
     }
 
     void UpdateParticle(int code)
@@ -148,12 +154,12 @@ public class BorneMeteo : MonoBehaviour
         if (rain != null) rain.Stop();
         if (snow != null) snow.Stop();
 
-        if (code >= 51 && code <= 67) { rain.Play(); rainAudio.Play(); }
-        else if (code >= 71 && code <= 77) { snow.Play(); rainAudio.Stop(); }
-        else if (code >= 80 && code <= 82) { rain.Play(); rainAudio.Play(); }
-        else if (code >= 85 && code <= 86) { snow.Play(); rainAudio.Stop(); }
-        else if (code >= 95) { rain.Play(); rainAudio.Play(); }
-        else { rainAudio.Stop(); }
+        if (code >= 51 && code <= 67) { rain.Play(); rainAudio.Play(); thunderAudio.Stop(); }
+        else if (code >= 71 && code <= 77) { snow.Play(); rainAudio.Stop(); thunderAudio.Stop(); }
+        else if (code >= 80 && code <= 82) { rain.Play(); rainAudio.Play(); thunderAudio.Stop(); }
+        else if (code >= 85 && code <= 86) { snow.Play(); rainAudio.Stop(); thunderAudio.Stop(); }
+        else if (code >= 95) { rain.Play(); rainAudio.Stop(); thunderAudio.Play(); }
+        else { rainAudio.Stop(); thunderAudio.Stop(); }
     }
 }
 
