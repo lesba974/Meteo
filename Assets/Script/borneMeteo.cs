@@ -30,9 +30,9 @@ public class BorneMeteo : MonoBehaviour
 
     void Start()
     {
-        if (clouds != null) clouds.Stop();
-        if (rain != null) rain.Stop();
-        if (snow != null) snow.Stop();
+        if (clouds != null) clouds.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        if (rain != null) rain.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        if (snow != null) snow.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         if (lightningLight != null) lightningLight.enabled = false;
         RenderSettings.fog = false;
     }
@@ -189,12 +189,12 @@ public class BorneMeteo : MonoBehaviour
 
     void UpdateParticle(int code)
     {
-        if (rain != null) rain.Stop();
-        if (snow != null) snow.Stop();
-        if (clouds != null) clouds.Stop();
-        ArreterEclair(); 
+        if (rain != null) rain.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        if (snow != null) snow.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        if (clouds != null) clouds.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        ArreterEclair();
 
-        if (code >= 1 && code <= 3) { clouds.Play(); }
+        if (code >= 1 && code <= 3) { clouds.Play(); rainAudio.Stop(); thunderAudio.Stop(); }
         else if (code >= 51 && code <= 67) { rain.Play(); rainAudio.Play(); thunderAudio.Stop(); }
         else if (code >= 71 && code <= 77) { snow.Play(); rainAudio.Stop(); thunderAudio.Stop(); }
         else if (code >= 80 && code <= 82) { rain.Play(); rainAudio.Play(); thunderAudio.Stop(); }
@@ -204,7 +204,7 @@ public class BorneMeteo : MonoBehaviour
             rain.Play();
             rainAudio.Stop();
             thunderAudio.Play();
-            StartCoroutine("Eclair"); 
+            StartCoroutine("Eclair");
         }
         else { rainAudio.Stop(); thunderAudio.Stop(); }
     }
